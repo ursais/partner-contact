@@ -5,8 +5,10 @@
         <field name="review_type">group</field>
         <field name="reviewer_group_id" ref="base.group_user" />
         <field name="definition_type">domain</field>
-        <field
-            name="definition_domain"
-        >["&amp;",["parent_id","=",False],"|",["active","=",True],["active","=",False]]</field>
+        <field name="definition_domain">[
+        ("company_type", "=", "company"),
+        ("parent_id","=",False),
+        "|", ("active","=",True), ("active","=",False)]
+        </field>
     </record>
 </odoo>
