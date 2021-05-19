@@ -12,8 +12,17 @@ class ResPartner(models.Model):
     state = fields.Selection(
         [("draft", "Draft"), ("confirmed", "Active"), ("cancel", "Archived")],
         string="Status",
-        default="draft",
+        default="confirmed",
     )
+
+    @api.model
+    def _tier_revalidation_fields(self, values):
+        """
+        Changing some Partner fields forces Tier Validation to be reevaluated.
+        Out of the box these are is_company and parent_id.
+        Other can be added extenting this method.
+        """
+        return ["is_company", "parent_id"]
 
     @api.model
     def create(self, vals):
@@ -23,10 +32,12 @@ class ResPartner(models.Model):
         return new
 
     def write(self, vals):
-        """
-        Default `active` is False.
-        It is set to True when State changes to confirmed.
-        """
+        # Changing certain fields required new validation process
+        revalidate_fields = self._tier_revalidation_fields(vals)
+        if any(x in revalidate_fields for x in vals.keys()):
+            vals["state"] = "draft"
+        # Automatically update active flag depending on state
         if "state" in vals:
             vals["active"] = vals["state"] == "confirmed"
-        return super().write(vals)
+        res = super().write(vals)
+        return res
