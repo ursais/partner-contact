@@ -25,7 +25,6 @@ class ResPartnerIdCategory(models.Model):
 
     color = fields.Integer(string="Color Index", default=_get_default_color)
     code = fields.Char(
-        string="Code",
         size=16,
         required=True,
         help="Abbreviation or acronym of this ID type. For example, "
@@ -37,7 +36,7 @@ class ResPartnerIdCategory(models.Model):
         translate=True,
         help="Name of this ID type. For example, 'Driver License'",
     )
-    active = fields.Boolean(string="Active", default=True)
+    active = fields.Boolean(default=True)
     validation_code = fields.Text(
         "Python validation code", help="Python code called to validate an id number."
     )
@@ -58,14 +57,11 @@ class ResPartnerIdCategory(models.Model):
         try:
             safe_eval(self.validation_code, eval_context, mode="exec", nocopy=True)
         except Exception as e:
-            raise UserError(
-                _(
-                    "Error when evaluating the id_category validation code:"
-                    ":\n %s \n(%s)"
-                )
-                % (self.name, e)
-            )
+            msg = (
+                "Error when evaluating the id_category validation code:" ":\n {} \n {})"
+            ).format(self.name, e)
+            raise UserError(_(msg)) from e
+
         if eval_context.get("failed", False):
-            raise ValidationError(
-                _("%s is not a valid %s identifier") % (id_number.name, self.name)
-            )
+            msg = "{} is not a valid {} identifier".format(id_number.name, self.name)
+            raise ValidationError(_(msg))
