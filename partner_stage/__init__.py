@@ -1,2 +1,2 @@
 from . import models
-from .init_hook import post_init_hook
+from .init_hook import post_init_hook, pre_init_hook
