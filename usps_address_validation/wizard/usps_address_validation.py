@@ -48,7 +48,7 @@ class USPSAdressValidation(models.TransientModel):
         """
         address_match = valid_address and valid_address.get('AddressMatch')
         city_state_zip_match = valid_address and valid_address.get('CityStateZipOK')
-        address_dict = valid_address# and valid_address.get('Address1')
+        address_dict = valid_address
         print(address_dict)
         if address_dict:
             res.update({
@@ -79,7 +79,6 @@ class USPSAdressValidation(models.TransientModel):
                 "zip": self.zip,
                 "state_id": state_id and state_id.id or False,
                 "usps_date_validation": fields.Date.today()
-                # "country_id": Partner.get_country_from_code(self.country),
             }
             address.write(vals)
         return {"type": "ir.actions.act_window_close"}

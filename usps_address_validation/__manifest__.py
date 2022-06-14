@@ -1,9 +1,10 @@
+# License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 {
     'name': 'USPS Address Validation',
-    'category': 'Sales',
-    'version': '13.02.03.2022',
-    'summary': """""",
-    'description': """""",
+    'category': 'Extra Tools',
+    'version': '14.0.1.0.0',
+    'summary': """Utilize the USPS open API for address validation""",
+    'description': """This module adds a tool to the Contacts page which validates the contact's address. Simply click the 'Validate' button, and the address of the contact will be compared to the USPS address database. The result will be a cleaned address, including the full 9 digit zipcode, in the exact format recognized by USPS""",
     'depends': ['contacts'],
 
     'data': [
@@ -13,10 +14,8 @@
 	'views/config.xml',
     ],
     'author': 'Open Source Integrators, Odoo Community Association (OCA)',
-    'images': [''],
     'maintainer': ['ckolobow'],
-    'website': 'www.opensourceintegrators.com',
-    'live_test_url': '',
+    'website': 'https://github.com/OCA/sale-workflow',
     'demo': [],
     'installable': True,
     'application': True,
@@ -24,5 +23,3 @@
     'license': 'AGPL-3',
 
 }
-# 13.02.03.2022
-# fix state code issue

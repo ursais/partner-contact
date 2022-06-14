@@ -1,3 +1,4 @@
+<!-- # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html). -->
 <odoo>
     <record id="usps_address_validation_view_form" model="ir.ui.view">
         <field name="name">USPS Address Validation Form Wizard</field>

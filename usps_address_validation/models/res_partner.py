@@ -37,7 +37,7 @@ class USPSAddressPartner(models.Model):
         prepare xml data for address validation api
         """
         
-        #web="https://secure.shippingapis.com/ShippingAPI.dll"
+        #Default address as of 6/22: "https://secure.shippingapis.com/ShippingAPI.dll"
         try:
             web = self.env['ir.config_parameter'].sudo().get_param('usps_api_url')
             user_id = self.env['ir.config_parameter'].sudo().get_param('usps_username')
