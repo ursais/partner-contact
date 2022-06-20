@@ -6,7 +6,7 @@
     "summary": """Utilize the USPS open API for address validation""",
     "description": """This module adds a tool to the Contacts page which validates the contact's address.""",
     "depends": ["contacts"],
-    "external_dependencies": {"python": ["xmltodict","requests"]},
+    "external_dependencies": {"python": ["xmltodict", "requests"]},
     "data": [
         "security/ir.model.access.csv",
         "wizard/usps_address_validation.xml",

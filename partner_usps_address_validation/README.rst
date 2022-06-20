@@ -1,6 +1,6 @@
-===========
+=======================
 USPS Address Validation
-===========
+=======================
 
 
 .. |badge1| image:: https://img.shields.io/badge/maturity-Beta-yellow.png
