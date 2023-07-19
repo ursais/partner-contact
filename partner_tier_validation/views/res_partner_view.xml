@@ -11,6 +11,12 @@
             <!-- Tier Validation UI needs the state field to be in the form -->
             <field name="stage_id" position="before">
                 <field name="state" invisible="1" />
+                <field name="need_validation" invisible="1" />
+                <field name="validated" invisible="1" />
+                <field name="rejected" invisible="1" />
+                <field name="can_review" invisible="1"/>
+                <field name="next_review" invisible="1"/>
+                <field name="review_ids" invisible="1"/>
             </field>
 
         </field>
