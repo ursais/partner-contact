@@ -111,8 +111,8 @@ class ResPartner(models.Model):
                 force_send=True,
             )
 
-        for partner in medical_partner_ids:
-            email_medical_template_id.send_mail(
-                partner.id,
-                force_send=True,
-            )
+        # for partner in medical_partner_ids:
+        #     email_medical_template_id.send_mail(
+        #         partner.id,
+        #         force_send=True,
+        #     )
