@@ -22,4 +22,8 @@ elif str(
         <field name="name">Medical License</field>
         <field name="code">ML</field>
     </record>
+    <record model="res.partner.id_category" id="res_partner_id_category_controlled_substance">
+        <field name="name">Controlled Substance</field>
+        <field name="code">CS</field>
+    </record>
 </odoo>
