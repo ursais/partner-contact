@@ -36,6 +36,16 @@ class ResPartner(models.Model):
         compute="_compute_dea_medical_license",
         store=True,
     )
+    contr_subst_license = fields.Char(
+        string="Contr. Subst. License",
+        compute="_compute_dea_medical_license",
+        store=True,
+    )
+    contr_subst_expired_date = fields.Date(
+        string="Contr. Subst. Expiration Date",
+        compute="_compute_dea_medical_license",
+        store=True,
+    )
 
     @api.depends("id_numbers")
     def _compute_dea_medical_license(self):
@@ -45,6 +55,10 @@ class ResPartner(models.Model):
         )
         medical_id = self.env.ref(
             "partner_identification_dea.res_partner_id_category_medical",
+            raise_if_not_found=False,
+        )
+        controlled_subst_id = self.env.ref(
+            "partner_identification_dea.res_partner_id_category_controlled_substance",
             raise_if_not_found=False,
         )
         partner_id_number_obj = self.env["res.partner.id_number"]
@@ -67,6 +81,15 @@ class ResPartner(models.Model):
                 order="id desc",
                 limit=1,
             )
+            controlled_subst = partner_id_number_obj.search(
+                [
+                    ("category_id", "=", controlled_subst_id and controlled_subst_id.id),
+                    ("status", "=", "open"),
+                    ("partner_id", "=", rec.id),
+                ],
+                order="id desc",
+                limit=1,
+            )
             rec.dea_active = dea_number and "yes" or "no"
             rec.dea_expired_date = dea_number and dea_number.valid_until or False
             rec.dea_number = dea_number and dea_number.name or ""
@@ -75,6 +98,10 @@ class ResPartner(models.Model):
             rec.medical_license = medical_license and medical_license.name or ""
             rec.medical_license_expired_date = (
                 medical_license and medical_license.valid_until or False
+            )
+            rec.contr_subst_license = controlled_subst.name if controlled_subst else ""
+            rec.contr_subst_expired_date = (
+                controlled_subst.valid_until if controlled_subst else False
             )
 
     @api.model
@@ -116,3 +143,15 @@ class ResPartner(models.Model):
         #         partner.id,
         #         force_send=True,
         #     )
+
+    @api.model
+    def name_search(self, name='', args=None, operator='ilike', limit=100):
+        args = args or []
+        if name:
+            domain = [
+                "|",
+                ("name", operator, name),
+                ("contr_subst_license", operator, name)
+            ]
+            return self.search(domain + args, limit=limit).name_get()
+        return super().name_search(name=name, args=args, operator=operator, limit=limit)
