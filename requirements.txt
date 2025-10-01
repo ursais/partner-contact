@@ -1,5 +1,0 @@
-python-stdnum
-suds
-requests
-unicodecsv
-email_validator
