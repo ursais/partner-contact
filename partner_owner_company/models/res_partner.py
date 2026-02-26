@@ -24,13 +24,21 @@ class ResPartner(models.Model):
         - Exact email match
         """
         args = args or []
+        # For partial matches, prioritize current company contacts
+        owner_args = [
+            "|",
+            "|",
+            ["owner_company_id", "parent_of", [self.env.company.id]],
+            ["parent_id.owner_company_id", "parent_of", [self.env.company.id]],
+            "&",
+            ["owner_company_id", "=", False],
+            ["parent_id.owner_company_id", "=", False],
+        ]
+        res = super().name_search(name, owner_args + args, operator, limit)
 
-        #if not name:
-        #    return super().name_search(name, args, operator, limit)
-
-        # Try exact matches first (bypasses company filtering)
+        # If not result, try exact matches (bypasses company filtering)
         # Check if search term matches full name, exact code, or exact email
-        if name:
+        if name and not res:
             exact_match_domain = [
                 "|",
                 ("name", "=ilike", name),
@@ -40,14 +48,6 @@ class ResPartner(models.Model):
                 ("email", "=ilike", name),
                 ("vat", "=ilike", name),
             ]
-            exact_matches = self._search(exact_match_domain + args, limit=limit)
-            if exact_matches:
-                return self.browse(exact_matches).name_get()
+            res = super().name_search(name, exact_match_domain + args, operator, limit)
 
-        # For partial matches, prioritize current company contacts
-        owner_args = [
-            "|", 
-            ["owner_company_id", "=", False],
-            ["owner_company_id", "parent_of", [self.env.company.id]],
-        ]
-        return super().name_search(name, owner_args + args, operator, limit)
+        return res
