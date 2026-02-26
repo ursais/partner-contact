@@ -10,9 +10,7 @@ class ResPartner(models.Model):
     _inherit = "res.partner"
 
     dea_number = fields.Char(
-        string="DEA #",
-        compute="_compute_dea_medical_license",
-        store=True,
+        string="DEA #", compute="_compute_dea_medical_license", store=True,
     )
     dea_expired_date = fields.Date(
         string="DEA Expiration Date",
@@ -27,9 +25,7 @@ class ResPartner(models.Model):
     )
 
     medical_license = fields.Char(
-        string="Medical License",
-        compute="_compute_dea_medical_license",
-        store=True,
+        string="Medical License", compute="_compute_dea_medical_license", store=True,
     )
     medical_license_expired_date = fields.Date(
         string="Medical License Expiration Date",
@@ -83,7 +79,11 @@ class ResPartner(models.Model):
             )
             controlled_subst = partner_id_number_obj.search(
                 [
-                    ("category_id", "=", controlled_subst_id and controlled_subst_id.id),
+                    (
+                        "category_id",
+                        "=",
+                        controlled_subst_id and controlled_subst_id.id,
+                    ),
                     ("status", "=", "open"),
                     ("partner_id", "=", rec.id),
                 ],
@@ -113,29 +113,28 @@ class ResPartner(models.Model):
             "partner_identification_dea.email_template_dea_notification",
             raise_if_not_found=False,
         )
-        email_medical_template_id = self.env.ref(
-            "partner_identification_dea.email_template_medical_notification",
-            raise_if_not_found=False,
-        )
+        # email_medical_template_id = self.env.ref(
+        #     "partner_identification_dea.email_template_medical_notification",
+        #     raise_if_not_found=False,
+        # )
         des_partner_ids = self.search(
             [
                 ("dea_expired_date", "=", fields.Date.today() + relativedelta(days=30)),
                 ("dea_active", "=", "yes"),
             ]
         )
-        medical_partner_ids = self.search(
-            [
-                (
-                    "medical_license_expired_date",
-                    "=",
-                    fields.Date.today() + relativedelta(days=30),
-                )
-            ]
-        )
+        # medical_partner_ids = self.search(
+        #     [
+        #         (
+        #             "medical_license_expired_date",
+        #             "=",
+        #             fields.Date.today() + relativedelta(days=30),
+        #         )
+        #     ]
+        # )
         for partner in des_partner_ids:
             email_dea_template_id.send_mail(
-                partner.id,
-                force_send=True,
+                partner.id, force_send=True,
             )
 
         # for partner in medical_partner_ids:
@@ -145,13 +144,26 @@ class ResPartner(models.Model):
         #     )
 
     @api.model
-    def name_search(self, name='', args=None, operator='ilike', limit=100):
-        args = args or []
-        if name:
-            domain = [
-                "|",
-                ("name", operator, name),
-                ("contr_subst_license", operator, name)
-            ]
-            return self.search(domain + args, limit=limit).name_get()
-        return super().name_search(name=name, args=args, operator=operator, limit=limit)
+    def _name_search(
+        self, name="", args=None, operator="ilike", limit=100, name_get_uid=None
+    ):
+        res = super()._name_search(name, args, operator, limit, name_get_uid)
+        self = self.with_user(name_get_uid) if name_get_uid else self
+        if (
+            name
+            and operator in ("=", "ilike", "=ilike", "like", "=like")
+            and (limit is None or len(res) < limit)
+        ):
+            if not args:
+                args = []
+            if limit is None:
+                limit2 = limit
+            else:
+                limit2 = limit - len(res)
+            partner_ids = self._search(
+                [("contr_subst_license", operator, name)] + args,
+                limit=limit2,
+                access_rights_uid=name_get_uid,
+            )
+            res += [id for id in partner_ids if id not in res]
+        return res
