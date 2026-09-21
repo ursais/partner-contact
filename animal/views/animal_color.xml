@@ -1,5 +1,5 @@
 <odoo>
-    <!-- Animal color Tree View -->
+    <!-- Animal color List View -->
     <record id="view_animal_color_tree" model="ir.ui.view">
         <field name="name">view.animal.color.tree</field>
         <field name="model">animal.color</field>

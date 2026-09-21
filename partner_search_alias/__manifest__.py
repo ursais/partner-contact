@@ -2,7 +2,7 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 {
     "name": "Partner Search Alias",
-    "version": "18.0.1.0.0",
+    "version": "20.0.1.0.0",
     "author": "Quartile, Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/partner-contact",
     "category": "Partner",

@@ -5,7 +5,7 @@
 
 {
     "name": "Partner External Maps",
-    "version": "18.0.1.0.0",
+    "version": "20.0.1.0.0",
     "category": "Extra Tools",
     "license": "AGPL-3",
     "summary": "Add Map and Map Routing buttons on partner form to "
@@ -18,8 +18,7 @@
         "views/map_website_view.xml",
         "data/map_website_data.xml",
         "views/res_users_view.xml",
-        "security/ir.model.access.csv",
-    ],
+        "security/ir.access.csv"],
     "post_init_hook": "set_default_map_settings",
     "installable": True,
 }

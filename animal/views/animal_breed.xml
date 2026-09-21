@@ -1,5 +1,5 @@
 <odoo>
-    <!-- Animal breed Tree View -->
+    <!-- Animal breed List View -->
     <record id="view_animal_breed_tree" model="ir.ui.view">
         <field name="name">view.animal.breed.tree</field>
         <field name="model">animal.breed</field>

@@ -1,7 +1,8 @@
-import {Component} from "@odoo/owl";
+import { Component, usePlugin } from "@odoo/owl";
 import {registry} from "@web/core/registry";
 import {standardFieldProps} from "@web/views/fields/standard_field_props";
 import {useService} from "@web/core/utils/hooks";
+import { ActionManagerPlugin } from "@web/webclient/actions/action_plugin";
 
 class X2ManyLinks extends Component {
     static template = "partner_email_duplicate_warn.X2ManyLinks";
@@ -11,7 +12,7 @@ class X2ManyLinks extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.action = useService("action");
+        this.action = usePlugin(ActionManagerPlugin);
     }
 
     get currentField() {
