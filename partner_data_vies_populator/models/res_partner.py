@@ -5,7 +5,9 @@
 import logging
 
 from odoo import api, models
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
+
+from odoo.addons.base.models.res_partner import EU_EXTRA_VAT_CODES
 
 _logger = logging.getLogger(__name__)
 
@@ -63,15 +65,34 @@ class ResPartner(models.Model):
         vat = (self.vat or "").strip().upper()
         if not vat or not self.is_company:
             return {}
-        eu_group = self.env.ref("base.europe", raise_if_not_found=False)
-        if not eu_group:
-            return {}
         vat_country, _vat_number = self._split_vat(vat)
-        vat_country = vat_country.upper()
-        eu_countries = eu_group.country_ids.mapped("code")
-        if vat_country and vat_country not in eu_countries:
+        country = self.country_id
+        if vat_country:
+            # A country prefix in the VAT wins over the partner's country
+            country = (
+                self.env["res.country"].search(
+                    [("code", "=ilike", vat_country)], limit=1
+                )
+                or country
+            )
+        if not country:
             return {}
-        return self._get_vies_data(vat)
+        try:
+            # _run_vat_checks also prefixes unprefixed VATs from EU_PREFIX
+            # countries, e.g. a Portuguese '516094564' -> 'PT516094564'
+            vat_full, country_code = self._run_vat_checks(
+                country, vat, validation="error"
+            )
+        except ValidationError:
+            return {}
+        eu_group = self.env.ref("base.europe", raise_if_not_found=False)
+        eu_codes = eu_group.country_ids.mapped("code") if eu_group else []
+        if not vat_full or (
+            country_code not in eu_codes
+            and country_code not in EU_EXTRA_VAT_CODES.values()
+        ):
+            return {}
+        return self._get_vies_data(vat_full)
 
     def _vies_populate(self):
         for partner in self:
