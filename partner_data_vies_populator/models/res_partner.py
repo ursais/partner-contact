@@ -52,12 +52,27 @@ class ResPartner(models.Model):
         return res
 
     @api.model
+    def _vies_notify(self, notif_type, message):
+        bus_send = getattr(self.env.user, "_bus_send", None)
+        if bus_send:
+            bus_send(
+                "simple_notification",
+                {
+                    "type": notif_type,
+                    "title": self.env._("VIES"),
+                    "message": message,
+                    "sticky": notif_type != "success",
+                },
+            )
+
+    @api.model
     def _get_vies_data(self, vat, raise_if_fail=False):
         res = {}
         try:
             result = check_vies(vat)
         except Exception as e:
             _logger.warning("Failed to query VIES: %s", e)
+            self._vies_notify("danger", self.env._("Failed to query VIES.\n%s", e))
             if raise_if_fail:
                 raise UserError(
                     self.env._("Failed to query VIES.\nTechnical error: %s.", e)
@@ -78,6 +93,14 @@ class ResPartner(models.Model):
             )
             if country:
                 res["country_id"] = country[0].id
+            self._vies_notify(
+                "success",
+                self.env._(
+                    "VAT %(vat)s validated: %(name)s", vat=vat, name=result.name
+                ),
+            )
+        else:
+            self._vies_notify("warning", self.env._("No VIES data found for %s.", vat))
         return res
 
     def _vies_fetch_result(self):
