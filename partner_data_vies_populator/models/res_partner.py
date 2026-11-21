@@ -5,6 +5,8 @@
 import logging
 import re
 
+import isodate
+
 from odoo import api, models
 from odoo.exceptions import UserError, ValidationError
 
@@ -17,24 +19,21 @@ try:
 except ImportError:
     _logger.debug("Cannot import check_vies method from python stdnum.")
 
-try:
-    import isodate
+_original_parse_date = isodate.parse_date
 
-    _original_parse_date = isodate.parse_date
 
-    def _vies_parse_date(datestring):
-        # VIES returns requestDate as an xsd:date with a timezone offset
-        # (e.g. '2026-11-20+01:00'), which isodate.parse_date rejects and
-        # zeep logs as an error on every call. Parse the date part only.
-        if isinstance(datestring, str) and re.match(
-            r"^\d{4}-\d{2}-\d{2}[+-]\d{2}:?\d{2}$", datestring
-        ):
-            datestring = datestring[:10]
-        return _original_parse_date(datestring)
+def _vies_parse_date(datestring):
+    # VIES returns requestDate as an xsd:date with a timezone offset
+    # (e.g. '2026-11-20+01:00'), which isodate.parse_date rejects and
+    # zeep logs as an error on every call. Parse the date part only.
+    if isinstance(datestring, str) and re.match(
+        r"^\d{4}-\d{2}-\d{2}[+-]\d{2}:?\d{2}$", datestring
+    ):
+        datestring = datestring[:10]
+    return _original_parse_date(datestring)
 
-    isodate.parse_date = _vies_parse_date
-except ImportError:
-    _logger.debug("Cannot import isodate for VIES requestDate parsing.")
+
+isodate.parse_date = _vies_parse_date
 
 
 class ResPartner(models.Model):
