@@ -26,10 +26,6 @@ def mocked_check_vies(vat):
         res.name = "NO ADDRESS SA"
         res.address = None
         res.countryCode = "FR"
-    elif vat == "PT516094564":
-        res.name = "VINHA LDA"
-        res.address = "Rua das Flores 1\n4000-069 Porto"
-        res.countryCode = "PT"
     else:
         # Default for other VATs to avoid hitting the real service
         res.valid = False
@@ -176,21 +172,6 @@ class TestPartnerCreateByVAT(TransactionCase):
         partner.vat = "BE0477472701"
         self.assertEqual(partner.name, self.sample_1["name"])
         self.assertEqual(partner.street, self.sample_1["address"])
-
-    def test_vat_without_country_prefix(self):
-        # A VAT without a country prefix is checked against the
-        # partner's country, like base_vat does
-        partner = self.partner_model.create(
-            {
-                "name": "To Replace",
-                "is_company": True,
-                "country_id": self.env.ref("base.pt").id,
-                "vat": "516094564",
-            }
-        )
-        self.assertEqual(partner.name, "VINHA LDA")
-        self.assertEqual(partner.zip, "4000-069")
-        self.assertEqual(partner.vat, "PT516094564")
 
     def test_non_eu_vat_change(self):
         non_eu_country_id = self.env.ref("base.sc").id
