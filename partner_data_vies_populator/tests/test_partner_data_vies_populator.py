@@ -39,6 +39,10 @@ def mocked_check_vies(vat):
         res.name = "NO ADDRESS SA"
         res.address = None
         res.countryCode = "FR"
+    elif vat == "PT516094564":
+        res.name = "VINHA LDA"
+        res.address = "Rua das Flores 1\n4000-069 Porto"
+        res.countryCode = "PT"
     else:
         # Default for other VATs to avoid hitting the real service
         res.valid = False
@@ -159,6 +163,49 @@ class TestPartnerCreateByVAT(TransactionCase):
             self.assertEqual(partner_form.name, "NO ADDRESS SA")
             self.assertEqual(partner_form.street, "Keep Me 1")
             self.assertEqual(partner_form.country_id.code, "FR")
+
+    def test_create_direct(self):
+        # Partner created with a VAT, e.g. by import or RPC, is populated
+        # without relying on the form onchange
+        partner = self.partner_model.create(
+            {
+                "name": "To Replace",
+                "is_company": True,
+                "vat": "be0477472701",
+            }
+        )
+        self.assertEqual(partner.name, self.sample_1["name"])
+        self.assertEqual(partner.street, self.sample_1["address"])
+        self.assertEqual(partner.country_id.code, self.sample_1["country_code"])
+        self.assertEqual(partner.vat, "BE0477472701")
+
+    def test_write_vat(self):
+        # Setting the VAT on an existing partner populates the VIES data
+        partner = self.partner_model.create(
+            {
+                "name": "4",
+                "is_company": True,
+                "country_id": self.be_country_id,
+            }
+        )
+        partner.vat = "BE0477472701"
+        self.assertEqual(partner.name, self.sample_1["name"])
+        self.assertEqual(partner.street, self.sample_1["address"])
+
+    def test_vat_without_country_prefix(self):
+        # A VAT without a country prefix is checked against the
+        # partner's country, like base_vat does
+        partner = self.partner_model.create(
+            {
+                "name": "To Replace",
+                "is_company": True,
+                "country_id": self.env.ref("base.pt").id,
+                "vat": "516094564",
+            }
+        )
+        self.assertEqual(partner.name, "VINHA LDA")
+        self.assertEqual(partner.zip, "4000-069")
+        self.assertEqual(partner.vat, "PT516094564")
 
     def test_non_eu_vat_change(self):
         non_eu_country_id = self.env.ref("base.sc").id
